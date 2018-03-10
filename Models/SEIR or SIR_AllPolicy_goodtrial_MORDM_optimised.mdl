@@ -1,0 +1,1254 @@
+{UTF-8}
+Awareness raising Hygiene=
+	IF THEN ELSE(Susceptible Non Hygienic population>0, DELAY3( IF THEN ELSE(Awareness or No Awareness\
+		 = 0, 0, Susceptible Non Hygienic population
+	*Awareness Effectiveness*Media outreach Rollout/Awareness Effect time), Awareness Effect time\
+		), 0)
+	~	Person/Day
+	~		|
+
+Preparing Vaccines=
+	DELAY3I( Vaccine Shortage*Vaccination rollout Rate/Vaccine Preparation and availability time\
+		, Vaccine Preparation and availability time
+	, 0)
+	~	Vaccines/Day
+	~	Delay introduced to account for distribution
+	|
+
+Vaccination rollout Rate=
+	1.67
+	~	Dmnl
+	~		|
+
+Media outreach Rollout=
+	1.64
+	~	Dmnl
+	~		|
+
+Contact Factor=
+	1
+	~	Dmnl
+	~		|
+
+Quarantined Dying Population=
+	(Quarantined Infectious Population*(Case fatality rate-Case fatality rate reduction)\
+		)/(Average critical condition and recovery period-Recovery Improved)
+	~	Person/Day
+	~		|
+
+Recovery Improved=
+	1
+	~	Day
+	~		|
+
+Quarantined Recovering=
+	(Quarantined Infectious Population*(1-(Case fatality rate-Case fatality rate reduction\
+		)))/(Average critical condition and recovery period-Recovery Improved)
+	~	Person/Day
+	~		|
+
+Infecting Hygienic=
+	IF THEN ELSE( Susceptible Hygienic Population>0, Non Quarantined Infectious Population\
+		 * Basic reproduction number * Fraction susceptible Hygienic population
+	*(Contact Factor-Contact Factor Reduction)
+	 / (Average infectious period), 0)
+	~	Person/Day
+	~		|
+
+Infecting Non Hygienic=
+	IF THEN ELSE( Susceptible Non Hygienic population>0, Non Quarantined Infectious Population\
+		*Contact Factor * Basic reproduction number
+	 * Fraction susceptible Non Hygienic population
+	 / (Average infectious period), 0)
+	~	Person/Day
+	~		|
+
+Vaccinations Hygienic=
+	IF THEN ELSE( Susceptible Hygienic Population>0, DELAY3( IF THEN ELSE(Vaccines Available\
+		>0, (Vaccination Effectiveness*
+	(Vaccination Speed Non Hygienic*Vaccination Speed improvement)*Medical personnel available\
+		*Fraction susceptible Hygienic population
+	)/Vaccines Dosage
+	, 0), Awareness Effect time), 0)
+	~	Person/Day
+	~		|
+
+Vaccines Usage=
+	IF THEN ELSE(Vaccines Available>0, Total Immunization through Vaccines*Vaccines Dosage\
+		, 0)
+	~	Vaccines/Day
+	~		|
+
+Development cost for vaccines=
+	400
+	~	USD/Person
+	~		|
+
+Spending=
+	(Cost for handling deceased*Total Dying Population)+(Cost for Isolation facilties*preparing isolation capacity\
+		)+(Staff costs
+	*training personnel)+((Vaccines cost per case+Development cost for vaccines)*Total Immunization through Vaccines\
+		)+(Cost For Advertising*Awareness raising Hygiene
+	)
+	~	USD/Day
+	~		|
+
+Contact Factor Reduction=
+	0.05
+	~	Dmnl
+	~		|
+
+Vaccinations Non Hygieninc=
+	IF THEN ELSE( Susceptible Non Hygienic population>0, DELAY3( IF THEN ELSE(Vaccines Available\
+		>0, (Vaccination Effectiveness*Vaccination Speed Non Hygienic*Medical personnel available\
+		*Fraction susceptible Non Hygienic population
+	)/Vaccines Dosage
+	, 0), Awareness Effect time), 0)
+	~	Person/Day
+	~		|
+
+Switch Awareness Program=
+	1
+	~	Dmnl
+	~		|
+
+Switch Isolation Scale Up=
+	1
+	~	Dmnl
+	~		|
+
+Awareness Effect time=
+	15
+	~	Day
+	~		|
+
+Awareness Effectiveness=
+	0.2
+	~	Dmnl
+	~	Percentage of People becoming aware
+	|
+
+Awareness or No Awareness=
+	IF THEN ELSE(Time>Hygiene program start time, Switch Awareness Program, 0)
+	~	Dmnl
+	~		|
+
+Vaccines Available= INTEG (
+	Preparing Vaccines-Vaccines Usage,
+		0)
+	~	Vaccines
+	~		|
+
+Hygiene program start time=
+	10
+	~	Day
+	~		|
+
+Initial Susceptible Hygienic Population=
+	0
+	~	Person
+	~		|
+
+Reporting new cases=
+	IF THEN ELSE(Scale up or No scale up=0, 0, MAX(Incubation*Effective detection of disease\
+		,0))
+	~	Person/Day
+	~		|
+
+Scale up or No scale up=
+	IF THEN ELSE(Time>Isolation Scale up Start Time, Switch Isolation Scale Up, 0)
+	~	Dmnl
+	~		|
+
+Cost For Advertising=
+	200
+	~	USD/Person
+	~		|
+
+Vaccination Effectiveness=
+	0.4
+	~	Dmnl
+	~		|
+
+Relative availability of Medical Personnel=
+	MIN ( XIDZ ( Medical personnel available , Total Personnel Demand Reactive, 1 ) , 1 \
+		)
+	~	Dmnl
+	~		|
+
+Vaccination Speed Non Hygienic=
+	50
+	~	Vaccines/Day*Person
+	~	Speed Per Doctor
+	|
+
+Isolation Scale up Start Time=
+	10
+	~	Day
+	~		|
+
+Initial Suceptible non Hygenic=
+	100000
+	~	Person
+	~		|
+
+Cost for handling deceased=
+	1100
+	~	USD/Person
+	~		|
+
+Cost for Isolation facilties=
+	150
+	~	USD/Person
+	~		|
+
+Vaccines cost per case=
+	100
+	~	USD/Person
+	~	Only proportionality with respect to other costs taken from Doctors \
+		without borders. Actual cost is not important. The tradeoff is.
+	|
+
+Total Dying Population=
+	Non Quarantined Dying+Quarantined Dying Population
+	~	Person/Day
+	~		|
+
+Total alive population=
+	Immune Hygienic+Immune Population Non Hygienic+Susceptible Hygienic Population+Susceptible Non Hygienic population\
+		+Exposed population+Infectious population+Quarantined Infectious Population+Non Quarantined Infectious Population\
+		+Recovered population
+	~	Person
+	~		|
+
+Effective detection of disease= INTEG (
+	Change in Detection rate,
+		Disease Detection rate)
+	~	Dmnl
+	~		|
+
+Disease Detection rate=
+	0.4
+	~	Dmnl
+	~		|
+
+Change in Detection rate=
+	(Disease Detection rate*relative availability of tracing personnel)-Effective detection of disease
+	~	Dmnl
+	~		|
+
+Available Isolation Capacity=
+	Total Isolation capacity-Quarantined Infectious Population
+	~	Person
+	~		|
+
+New capacity needed Proactive=
+	Case doubling compared to isloation available * Isolation capacity needed reactive*Fraction of Additional capacity as proactiveness\
+		 + Isolation capacity needed reactive
+	~	Person
+	~		|
+
+New Personnel Training Time=
+	15
+	~	Day
+	~	Uncertain
+	|
+
+Non Quarantined Dying=
+	(Non Quarantined Infectious Population*Case fatality rate)/Average critical condition and recovery period
+	~	Person/Day
+	~		|
+
+Average Staff commisioning time=
+	363
+	~	Day
+	~		|
+
+Non Quarantined Recoveing=
+	(Non Quarantined Infectious Population*Case fatality rate)/Average critical condition and recovery period
+	~	Person/Day
+	~		|
+
+Not going to Quarantine=
+	Incubation-Going To Quarantine
+	~	Person/Day
+	~		|
+
+Case doubling compared to isloation available=
+	ZIDZ( Isolation capacity preparation time, Case Doubling Time)
+	~	Dmnl
+	~		|
+
+Case Doubling Time=
+	MIN ( ZIDZ( Natural Log 2 , fractional growth rate of cases ), 200 )
+	~	Day
+	~	Definition by John Sterman 2000, p. 269
+		Not sure where 200 days as cut-off threshold came. Maybe it is linked with \
+		disease controllability. Howver, it has not been researched and left out \
+		of scope.
+	|
+
+Case doubling time compared to personnel training time=
+	ZIDZ( New Personnel Training Time, Case Doubling Time)
+	~	Dmnl
+	~		|
+
+Case fatality rate=
+	0.015
+	~	Dmnl
+	~		|
+
+Personnel Leaving=
+	Personnel Available/Average Staff commisioning time
+	~	Person/Day
+	~		|
+
+Personnel per case to handle=
+	4
+	~	1/Day
+	~	Tracing, medical and nurses:  tracers,  nurse, doctor, hygeine experts, other staff \
+		. However it s uncertain due to the unknown nature of an outbreak
+		https://extranet.who.int/ebolafmt/sites/default/files/ETC_considerations_fo\
+		r_set_up.pdf
+	|
+
+preparing isolation capacity=
+	DELAY3I(New capacity needed Actual, Isolation capacity preparation time, New capacity needed Actual\
+		/Isolation capacity preparation time)
+	~	Person/Day
+	~		|
+
+Staff costs=
+	700
+	~	USD/Person
+	~		|
+
+Culmulative Project Costs= INTEG (
+	Spending,
+		1)
+	~	USD
+	~		|
+
+Proactive starting time=
+	62.47
+	~	Day
+	~		|
+
+Downscaling Isolation capacity=
+	Total Isolation capacity/Facility commisioning time
+	~	Person/Day
+	~		|
+
+Facility commisioning time=
+	331
+	~	Day
+	~		|
+
+facility preparation time=
+	1
+	~	Day
+	~		|
+
+Fraction of Additional capacity as proactiveness=
+	0.27
+	~	Dmnl
+	~	Out of the entire proactive requirement, how much should actually be \
+		additionally to optimize cost
+	|
+
+Fraction of additional personnel as proactiveness=
+	0.686
+	~	Dmnl
+	~	Out of the entire proactive requirement, how much should actually be \
+		additionally to optimize cost
+	|
+
+fraction of population available for personnel=
+	(fraction of recovered population volunteering for personnel*Recovered population)+(\
+		fraction of susceptible population volunteering for personnel*Total Susceptible population\
+		)
+	~	Person
+	~		|
+
+fraction of recovered population volunteering for personnel=
+	0.1
+	~	Dmnl
+	~		|
+
+fraction of staff getting infected=
+	0.05
+	~	Dmnl
+	~		|
+
+fraction of susceptible population volunteering for personnel=
+	2e-005
+	~	Dmnl
+	~		|
+
+Fraction of Tracing personnel=
+	0.5
+	~	Dmnl
+	~		|
+
+training personnel=
+	DELAY3I( MIN(shortage of personnel,fraction of population available for personnel), \
+		New Personnel Training Time, MIN(shortage of personnel,fraction of population available for personnel\
+		)/New Personnel Training Time)
+	~	Person/Day
+	~		|
+
+fractional growth rate of cases=
+	ZIDZ( Increasing Cases, Total Cases of Exposure and Infection)
+	~	1/Day
+	~		|
+
+Going To Quarantine=
+	Relative available capacity*Reporting new cases
+	~	Person/Day
+	~		|
+
+Switch Vaccine or No Vaccine=
+	1
+	~	Dmnl
+	~		|
+
+Increasing Cases=
+	Incubation
+	~	Person/Day
+	~		|
+
+Total Isolation capacity= INTEG (
+	preparing isolation capacity-Downscaling Isolation capacity,
+		10)
+	~	Person
+	~		|
+
+Total Personnal Demand actual=
+	IF THEN ELSE ( Proactive or Reactive = 0 , Total Personnel Demand Reactive , Total personnel Demand proactive\
+		 )
+	~	Person
+	~		|
+
+Total personnel Demand proactive=
+	Case doubling time compared to personnel training time * Total Personnel Demand Reactive\
+		*Fraction of additional personnel as proactiveness + Total Personnel Demand Reactive
+	~	Person
+	~		|
+
+Total Personnel Demand Reactive=
+	Personnel per case to handle*Reporting new cases
+	~	Person
+	~		|
+
+Total Susceptible population=
+	Susceptible Hygienic Population+Susceptible Non Hygienic population
+	~	Person
+	~		|
+
+Tracing personnel available=
+	Personnel Available*Fraction of Tracing personnel
+	~	Person
+	~		|
+
+Initial personnel available=
+	100
+	~	Person
+	~		|
+
+Vaccination Speed improvement=
+	1.5
+	~	Vaccines/Day*Person
+	~		|
+
+Natural Log 2=
+	0.693147
+	~	Dmnl
+	~		|
+
+Vaccine Needed=
+	Total Susceptible population*Vaccines Dosage
+	~	Vaccines
+	~		|
+
+Vaccine or No Vaccine=
+	IF THEN ELSE(Time>Vaccination Program Start time, Switch Vaccine or No Vaccine, 0)
+	~	Dmnl
+	~	0 = No Vaacine, Else Vaccine
+	|
+
+Isolation capacity needed reactive=
+	MAX((Reporting new cases*Average critical condition and recovery period)+Quarantined Infectious Population\
+		-Total Isolation capacity, 0)
+	~	Person
+	~		|
+
+Isolation capacity preparation time=
+	7
+	~	Day
+	~		|
+
+Medical personnel available=
+	(1-Fraction of Tracing personnel)*Personnel Available
+	~	Person
+	~		|
+
+Switch Proactive or Reactive=
+	1
+	~	Dmnl
+	~		|
+
+Net available isolation capacity=
+	(Available Isolation Capacity/facility preparation time)+People leaving Quarantine
+	~	Person/Day
+	~		|
+
+New capacity needed Actual=
+	IF THEN ELSE(Proactive or Reactive = 0, Isolation capacity needed reactive, New capacity needed Proactive\
+		)
+	~	Person
+	~		|
+
+shortage of personnel=
+	MAX(Total Personnal Demand actual-Personnel Available, 0)
+	~	Person
+	~		|
+
+Proactive or Reactive=
+	IF THEN ELSE ( Time > Proactive starting time, Switch Proactive or Reactive , 0 )
+	~	Dmnl
+	~	0 = Reactive, Else = proactive
+	|
+
+Personnel Available= INTEG (
+	training personnel-Personnel dying-Personnel Leaving,
+		Initial personnel available)
+	~	
+	~		|
+
+Personnel dying=
+	Case fatality rate reduction*fraction of staff getting infected*Personnel Available
+	~	Person
+	~		|
+
+Relative available capacity=
+	MIN(XIDZ( Net available isolation capacity, Reporting new cases, 1),1)
+	~	Dmnl
+	~		|
+
+Reported Cases= INTEG (
+	Reporting new cases,
+		Initial recovered population+Initial exposed population+Initial infectious population\
+		)
+	~	Person
+	~		|
+
+People leaving Quarantine=
+	Quarantined Dying Population+Quarantined Recovering
+	~	Person/Day
+	~		|
+
+Vaccination Program Start time=
+	10
+	~	Day
+	~	Out of the entire proactive requirement, how much should actually be \
+		additionally to optimize cost
+	|
+
+Vaccine Shortage=
+	IF THEN ELSE(Vaccine or No Vaccine = 0, 0, MAX(Vaccine Needed-Vaccines Available , 0\
+		))
+	~	Vaccines
+	~		|
+
+relative availability of tracing personnel=
+	MIN ( XIDZ ( Tracing personnel available , Total Personnel Demand Reactive, 1 ) , 1 \
+		)
+	~	Dmnl
+	~		|
+
+Total Immunization through Vaccines=
+	Vaccinations Hygienic+Vaccinations Non Hygieninc
+	~	Person/Day
+	~		|
+
+Vaccine Preparation and availability time=
+	100
+	~	Day
+	~		|
+
+Vaccines Dosage=
+	1
+	~	Vaccines/Person
+	~		|
+
+Initial Quarantined=
+	0
+	~	Person
+	~		|
+
+Immune Hygienic= INTEG (
+	Vaccinations Hygienic,
+		0)
+	~	Person
+	~		|
+
+Recovering cases=
+	Quarantined Recovering
+	~	Person/Day
+	~		|
+
+Deceased population= INTEG (
+	Non Quarantined Dying+Quarantined Dying Population,
+		Initial deceased population)
+	~	Person
+	~		|
+
+Exposed population= INTEG (
+	Infecting Hygienic+Infecting Non Hygienic-Incubation,
+		Initial exposed population)
+	~	Person
+	~		|
+
+Immune Population Non Hygienic= INTEG (
+	Vaccinations Non Hygieninc,
+		0)
+	~	Person
+	~		|
+
+Quarantine Recovered Population= INTEG (
+	Recovering cases,
+		Initial recovered population)
+	~	Person
+	~		|
+
+Quarantined Infectious Population= INTEG (
+	Going To Quarantine-Quarantined Dying Population-Quarantined Recovering,
+		Initial Quarantined)
+	~	Person
+	~		|
+
+Total Cases of Exposure and Infection= INTEG (
+	Increasing Cases,
+		Initial recovered population+Initial exposed population+Initial infectious population\
+		)
+	~	Person
+	~		|
+
+Recovered population= INTEG (
+	Non Quarantined Recoveing+Quarantined Recovering,
+		Initial recovered population)
+	~	Person
+	~		|
+
+Infectious population= INTEG (
+	Incubation-Going To Quarantine-Not going to Quarantine,
+		Initial infectious population)
+	~	Person
+	~		|
+
+Non Quarantined Infectious Population= INTEG (
+	Not going to Quarantine-Non Quarantined Dying-Non Quarantined Recoveing,
+		Initial non Quarantined)
+	~	Person
+	~		|
+
+Susceptible Non Hygienic population= INTEG (
+	-Awareness raising Hygiene-Infecting Non Hygienic-Vaccinations Non Hygieninc,
+		Initial Suceptible non Hygenic)
+	~	Person
+	~		|
+
+Susceptible Hygienic Population= INTEG (
+	Awareness raising Hygiene-Infecting Hygienic-Vaccinations Hygienic,
+		Initial Susceptible Hygienic Population)
+	~	Person
+	~		|
+
+Initial non Quarantined=
+	1
+	~	Person
+	~		|
+
+Incubation=
+	IF THEN ELSE ( Switch SEIR or SIR = 1 , Exposed population / Average incubation time\
+		 , (Infecting Non Hygienic + Infecting Hygienic) )
+	~	Person/Day
+	~		|
+
+Fraction susceptible Hygienic population=
+	Susceptible Hygienic Population/Total alive population
+	~	Dmnl
+	~		|
+
+Fraction susceptible Non Hygienic population=
+	Susceptible Non Hygienic population / Total alive population
+	~	Dmnl
+	~		|
+
+Average critical condition and recovery period=
+	7
+	~	Day
+	~		|
+
+Average incubation time=
+	2
+	~	Day
+	~		|
+
+Average infectious period=
+	14
+	~	Day
+	~		|
+
+Basic reproduction number=
+	2
+	~	Dmnl
+	~		|
+
+Case fatality rate reduction=
+	0.005
+	~	Dmnl
+	~		|
+
+Initial deceased population=
+	0
+	~	Person
+	~		|
+
+Initial exposed population=
+	1
+	~	Person
+	~		|
+
+Initial infectious population=
+	1
+	~	Person
+	~		|
+
+Initial recovered population=
+	0
+	~	Person
+	~		|
+
+Switch SEIR or SIR=
+	1
+	~	Dmnl [1,1,2]
+	~	1 = SEIR, ELSE = SIR
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 365
+	~	Day
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Day
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 1
+	~	Day [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.0625
+	~	Day [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Population
+$192-192-192,0,Arial|12||0-0-0|0-0-0|0-166-214|-1--1--1|-1--1--1|96,96,80,0
+10,1,Susceptible Non Hygienic population,492,369,50,30,3,131,0,0,0,0,0,0
+10,2,Exposed population,916,356,40,20,3,131,0,0,0,0,0,0
+10,3,Infectious population,1233,356,40,20,3,3,0,0,0,0,0,0
+10,4,Recovered population,1797,345,40,20,3,3,0,0,0,0,0,0
+10,5,Deceased population,1591,350,40,20,3,3,0,0,0,0,0,0
+1,6,8,2,4,0,0,22,0,0,0,-1--1--1,,1|(834,361)|
+1,7,8,1,100,0,0,22,0,0,0,-1--1--1,,1|(661,361)|
+11,8,2332,786,361,6,8,34,3,0,0,1,0,0,0
+10,9,Infecting Non Hygienic,786,387,47,18,40,3,0,0,-1,0,0,0
+1,10,12,3,4,0,0,22,0,0,0,-1--1--1,,1|(1137,360)|
+1,11,12,2,100,0,0,22,0,0,0,-1--1--1,,1|(1013,360)|
+11,12,652,1076,360,6,8,34,3,0,0,1,0,0,0
+10,13,Incubation,1076,378,37,10,40,3,0,0,-1,0,0,0
+10,14,Initial exposed population,916,309,55,19,8,3,0,18,0,0,0,0,0-0-0,0-0-0,|12|I|107-134-137
+10,15,Initial infectious population,1233,400,58,19,8,3,0,18,0,0,0,0,0-0-0,0-0-0,|12|I|107-134-137
+10,16,Initial deceased population,1536,309,59,19,8,3,0,18,0,0,0,0,0-0-0,0-0-0,|12|I|107-134-137
+10,17,Initial recovered population,1798,391,60,19,8,3,0,18,0,0,0,0,0-0-0,0-0-0,|12|I|107-134-137
+10,18,Total alive population,1061,542,77,18,8,131,0,0,0,0,0,0
+10,19,Switch SEIR or SIR,1146,269,46,18,8,3,0,6,0,0,0,0,-1--1--1,165-202-26,|12||255-255-255
+10,20,Fraction susceptible Non Hygienic population,740,486,74,27,8,3,0,0,0,0,0,0
+1,21,18,20,1,0,0,0,0,64,0,-1--1--1,,1|(875,552)|
+1,22,1,18,1,0,0,0,0,64,0,-1--1--1,,1|(624,595)|
+1,23,2,18,1,0,0,0,0,64,0,-1--1--1,,1|(942,444)|
+1,24,3,18,1,0,0,0,0,64,0,-1--1--1,,1|(1148,474)|
+1,25,4,18,1,0,0,0,0,64,0,-1--1--1,,1|(1522,498)|
+1,26,1,20,1,0,0,0,0,64,0,-1--1--1,,1|(604,447)|
+1,27,20,9,1,0,0,0,0,64,0,-1--1--1,,1|(781,428)|
+10,28,Case fatality rate reduction,1697,248,63,19,8,3,0,18,0,0,0,0,0-0-0,0-0-0,|12|I|109-23-127
+10,29,Basic reproduction number,802,249,70,19,8,3,0,18,0,0,0,0,0-0-0,0-0-0,|12|I|109-23-127
+1,30,29,9,1,0,0,0,0,64,0,-1--1--1,,1|(789,308)|
+10,31,Average infectious period,767,-83,62,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-64
+10,32,Average incubation time,1061,463,60,21,8,131,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-128
+1,33,32,13,0,0,0,0,0,64,0,-1--1--1,,1|(1067,421)|
+1,34,2,13,1,0,0,0,0,64,0,-1--1--1,,1|(977,395)|
+1,35,31,9,1,0,0,0,0,64,0,-1--1--1,,1|(838,226)|
+1,36,19,13,1,0,0,0,0,64,0,-1--1--1,,1|(1153,330)|
+1,37,9,13,1,0,0,0,0,64,0,-1--1--1,,1|(908,451)|
+10,38,Immune Population Non Hygienic,111,355,53,31,3,131,0,0,0,0,0,0
+1,39,41,38,4,0,0,22,0,0,0,-1--1--1,,1|(231,353)|
+1,40,41,1,100,0,0,22,0,0,0,-1--1--1,,1|(376,353)|
+11,41,1308,305,353,6,8,34,3,0,0,1,0,0,0
+10,42,Vaccinations Non Hygieninc,305,371,65,18,40,3,0,0,-1,0,0,0
+10,43,Susceptible Hygienic Population,481,126,55,25,3,131,0,0,0,0,0,0
+10,44,Immune Hygienic,108,112,40,20,3,3,0,0,0,0,0,0
+1,45,47,44,4,0,0,22,0,0,0,-1--1--1,,1|(217,120)|
+1,46,47,43,100,0,0,22,0,0,0,-1--1--1,,1|(362,120)|
+11,47,1292,293,120,6,8,34,3,0,0,3,0,0,0
+10,48,Vaccinations Hygienic,293,94,48,18,40,3,0,0,-1,0,0,0
+10,49,Initial Susceptible Hygienic Population,430,180,76,22,8,131,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|92-92-92
+10,50,Initial Suceptible non Hygenic,436,314,62,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|92-92-92
+10,51,Quarantined Infectious Population,1245,71,50,28,3,131,0,0,0,0,0,0
+1,52,54,5,4,0,0,22,0,0,0,-1--1--1,,1|(1594,236)|
+1,53,54,51,100,0,0,22,0,0,0,-1--1--1,,1|(1594,71)|
+11,54,444,1594,137,8,6,33,3,0,0,4,0,0,0
+10,55,Quarantined Dying Population,1664,137,62,18,40,131,0,0,-1,0,0,0
+1,56,58,4,4,0,0,22,0,0,0,-1--1--1,,1|(1797,224)|
+1,57,58,51,100,0,0,22,0,0,0,-1--1--1,,1|(1797,71)|
+11,58,428,1797,117,8,6,33,3,0,0,4,0,0,0
+10,59,Quarantined Recovering,1850,117,45,18,40,3,0,0,-1,0,0,0
+10,60,Non Quarantined Infectious Population,1248,645,55,30,3,131,0,0,0,0,0,0
+1,61,63,60,4,0,0,22,0,0,0,-1--1--1,,1|(1233,537)|
+1,62,63,3,100,0,0,22,0,0,0,-1--1--1,,1|(1233,412)|
+11,63,572,1233,454,8,6,33,3,0,0,4,0,0,0
+10,64,Not going to Quarantine,1286,454,45,18,40,3,0,0,-1,0,0,0
+1,65,67,51,4,0,0,22,0,0,0,-1--1--1,,1|(1235,167)|
+1,66,67,3,100,0,0,22,0,0,0,-1--1--1,,1|(1235,291)|
+11,67,1564,1235,241,8,6,33,3,0,0,4,0,0,0
+10,68,Going To Quarantine,1284,241,41,18,40,3,0,0,-1,0,0,0
+1,69,71,5,4,0,0,22,0,0,0,-1--1--1,,1|(1600,462)|
+1,70,71,60,100,0,0,22,0,0,0,-1--1--1,,1|(1600,645)|
+11,71,1580,1600,561,8,6,33,3,0,0,4,0,0,0
+10,72,Non Quarantined Dying,1670,561,62,18,40,3,0,0,-1,0,0,0
+1,73,75,4,4,0,0,22,0,0,0,-1--1--1,,1|(1799,464)|
+1,74,75,60,100,0,0,22,0,0,0,-1--1--1,,1|(1799,645)|
+11,75,1260,1799,569,8,6,33,3,0,0,4,0,0,0
+10,76,Non Quarantined Recoveing,1869,569,62,18,40,3,0,0,-1,0,0,0
+10,77,Average critical condition and recovery period,1960,341,59,26,8,131,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-128
+1,78,80,2,4,0,0,22,0,0,0,-1--1--1,,1|(913,255)|
+1,79,80,43,100,0,0,22,0,0,0,-1--1--1,,1|(913,126)|
+11,80,492,913,168,8,6,33,3,0,0,4,0,0,0
+10,81,Infecting Hygienic,953,168,32,18,40,3,0,0,-1,0,0,0
+10,82,Initial Quarantined,1249,24,47,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|160-160-160
+10,83,Initial non Quarantined,1230,693,47,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|160-160-160
+1,84,81,13,1,0,0,0,0,128,0,-1--1--1,,1|(979,257)|
+1,85,31,81,1,0,0,0,0,128,0,-1--1--1,,1|(941,29)|
+1,86,29,81,1,0,0,0,0,128,0,-1--1--1,,1|(841,220)|
+1,87,60,9,1,0,0,0,0,128,0,-1--1--1,,1|(1000,598)|
+10,88,Total alive population,621,-119,43,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,89,Fraction susceptible Hygienic population,616,48,74,18,8,3,0,0,0,0,0,0
+1,90,43,89,1,0,0,0,0,128,0,-1--1--1,,1|(535,86)|
+1,91,88,89,1,0,0,0,0,128,0,-1--1--1,,1|(597,-41)|
+1,92,89,81,1,0,0,0,0,128,0,-1--1--1,,1|(854,56)|
+10,93,Non Quarantined Infectious Population,711,-18,74,26,8,130,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,94,93,81,1,0,0,0,0,128,0,-1--1--1,,1|(888,30)|
+1,95,49,43,0,0,0,0,0,128,1,-1--1--1,,1|(448,159)|
+1,96,50,1,0,0,0,0,0,128,1,-1--1--1,,1|(453,331)|
+1,97,82,51,0,0,0,0,0,128,1,-1--1--1,,1|(1254,43)|
+1,98,83,60,0,0,0,0,0,128,1,-1--1--1,,1|(1234,681)|
+1,99,16,5,0,0,0,0,0,128,1,-1--1--1,,1|(1556,325)|
+1,100,17,4,0,0,0,0,0,128,1,-1--1--1,,1|(1798,375)|
+1,101,15,3,0,0,0,0,0,128,1,-1--1--1,,1|(1233,385)|
+1,102,14,2,0,0,0,0,0,128,1,-1--1--1,,1|(916,325)|
+1,103,105,43,4,0,0,22,0,0,0,-1--1--1,,1|(489,195)|
+1,104,105,1,100,0,0,22,0,0,0,-1--1--1,,1|(489,295)|
+11,105,572,489,245,8,6,33,3,0,0,4,0,0,0
+10,106,Awareness raising Hygiene,554,245,57,18,40,3,0,0,-1,0,0,0
+10,107,Total Cases of Exposure and Infection,954,-182,62,35,3,131,0,0,0,0,0,0
+12,108,48,686,-190,10,8,0,3,0,0,-1,0,0,0
+1,109,111,107,4,0,0,22,0,0,0,-1--1--1,,1|(846,-190)|
+1,110,111,108,100,0,0,22,0,0,0,-1--1--1,,1|(742,-190)|
+11,111,48,794,-190,6,8,34,3,0,0,1,0,0,0
+10,112,Increasing Cases,794,-164,46,18,40,3,0,0,-1,0,0,0
+1,113,12,112,1,0,0,0,0,128,0,-1--1--1,,1|(937,0)|
+1,114,14,107,0,0,0,0,0,64,1,-1--1--1,,1|(933,78)|
+1,115,15,107,0,0,0,0,0,64,1,-1--1--1,,1|(1100,123)|
+1,116,17,107,0,0,0,0,0,64,1,-1--1--1,,1|(1393,116)|
+10,117,Quarantine Recovered Population,1778,-83,62,33,3,131,0,0,0,0,0,0
+12,118,48,2049,-86,10,8,0,3,0,0,-1,0,0,0
+1,119,121,117,4,0,0,22,0,0,0,-1--1--1,,1|(1891,-83)|
+1,120,121,118,100,0,0,22,0,0,0,-1--1--1,,1|(1996,-83)|
+11,121,48,1948,-83,6,8,34,3,0,0,1,0,0,0
+10,122,Recovering cases,1948,-57,42,18,40,3,0,0,-1,0,0,0
+1,123,59,122,1,0,0,0,0,128,0,-1--1--1,,1|(1867,40)|
+1,124,17,117,0,0,0,0,0,64,1,-1--1--1,,1|(1788,167)|
+10,125,Total Immunization through Vaccines,-99,220,68,18,8,3,0,0,0,0,0,0
+1,126,48,125,1,0,0,0,0,128,0,-1--1--1,,1|(73,64)|
+1,127,42,125,1,0,0,0,0,128,0,-1--1--1,,1|(78,420)|
+10,128,Reported Cases,1395,-139,55,27,3,131,0,0,0,0,0,0
+12,129,48,1156,-148,10,8,0,3,0,0,-1,0,0,0
+1,130,132,128,4,0,0,22,0,0,0,-1--1--1,,1|(1299,-148)|
+1,131,132,129,100,0,0,22,0,0,0,-1--1--1,,1|(1206,-148)|
+11,132,48,1253,-148,6,8,34,3,0,0,1,0,0,0
+10,133,Reporting new cases,1253,-122,53,18,40,3,0,0,-1,0,0,0
+1,134,14,128,0,0,0,0,0,64,1,-1--1--1,,1|(1145,93)|
+1,135,15,128,0,0,0,0,0,64,1,-1--1--1,,1|(1309,141)|
+1,136,17,128,0,0,0,0,0,64,1,-1--1--1,,1|(1603,135)|
+1,137,13,133,1,0,0,0,0,128,0,-1--1--1,,1|(1146,9)|
+10,138,relative availability of tracing personnel,1124,-233,77,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,139,Total Susceptible population,387,-1,64,18,8,3,0,0,0,0,0,0
+10,140,Susceptible Non Hygienic population,475,-84,77,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,141,43,139,1,0,0,0,0,128,0,-1--1--1,,1|(398,62)|
+1,142,140,139,1,0,0,0,0,128,0,-1--1--1,,1|(392,-53)|
+1,143,51,54,1,0,0,0,0,128,0,-1--1--1,,1|(1536,132)|
+1,144,60,71,1,0,0,0,0,128,0,-1--1--1,,1|(1378,604)|
+10,145,Case fatality rate,1692,360,47,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-128
+1,146,28,55,1,0,0,0,0,128,0,-1--1--1,,1|(1697,200)|
+1,147,145,72,1,0,0,0,0,128,0,-1--1--1,,1|(1713,436)|
+1,148,77,55,1,0,0,0,0,128,0,-1--1--1,,1|(1903,224)|
+1,149,77,72,1,0,0,0,0,128,0,-1--1--1,,1|(1866,452)|
+1,150,28,58,1,0,0,0,0,128,0,-1--1--1,,1|(1741,177)|
+1,151,145,75,1,0,0,0,0,128,0,-1--1--1,,1|(1741,435)|
+1,152,77,76,1,0,0,0,0,128,0,-1--1--1,,1|(1929,448)|
+1,153,77,59,1,0,0,0,0,128,0,-1--1--1,,1|(1929,218)|
+1,154,51,59,1,0,0,0,0,128,0,-1--1--1,,1|(1681,40)|
+1,155,60,76,1,0,0,0,0,128,0,-1--1--1,,1|(1784,630)|
+10,156,People leaving Quarantine,1490,217,55,18,8,3,0,0,0,0,0,0
+1,157,55,156,1,0,0,0,0,128,0,-1--1--1,,1|(1589,183)|
+1,158,59,156,1,0,0,0,0,128,0,-1--1--1,,1|(1685,206)|
+10,159,Available Isolation Capacity,1519,461,70,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,160,Net available isolation capacity,1410,287,64,18,8,3,0,0,0,0,0,0
+1,161,159,160,1,0,0,0,0,128,0,-1--1--1,,1|(1472,400)|
+1,162,156,160,1,0,0,0,0,128,0,-1--1--1,,1|(1468,249)|
+10,163,Relative available capacity,1412,160,66,18,8,3,0,0,0,0,0,0
+1,164,133,163,1,0,0,0,0,128,0,-1--1--1,,1|(1343,-12)|
+1,165,160,163,1,0,0,0,0,128,0,-1--1--1,,1|(1419,218)|
+10,166,facility preparation time,1383,387,60,18,8,3,0,0,0,0,0,0
+1,167,166,160,1,0,0,0,0,128,0,-1--1--1,,1|(1371,344)|
+1,168,163,68,1,0,0,0,0,128,0,-1--1--1,,1|(1367,203)|
+1,169,68,64,1,0,0,0,0,128,0,-1--1--1,,1|(1314,334)|
+1,170,13,64,1,0,0,0,0,128,0,-1--1--1,,1|(1114,408)|
+10,171,Susceptible Hygienic Population,892,712,78,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,172,171,18,1,0,0,0,0,128,0,-1--1--1,,1|(1016,671)|
+1,173,60,18,1,0,0,0,0,128,0,-1--1--1,,1|(1140,600)|
+10,174,Quarantined Infectious Population,1067,740,50,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,175,174,18,1,0,0,0,0,128,0,-1--1--1,,1|(1084,648)|
+1,176,133,68,1,0,0,0,0,128,0,-1--1--1,,1|(1309,0)|
+10,177,Vaccines Available,172,-77,44,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,178,Vaccination Speed improvement,23,21,71,19,8,131,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-128
+10,179,Vaccines Dosage,105,-36,40,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,180,178,48,1,0,0,0,0,128,0,-1--1--1,,1|(156,8)|
+1,181,179,48,1,0,0,0,0,128,0,-1--1--1,,1|(228,2)|
+1,182,177,48,1,0,0,0,0,128,0,-1--1--1,,1|(257,-24)|
+10,183,Vaccines Dosage,130,526,40,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,184,Vaccines Available,210,553,40,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,185,184,42,1,0,0,0,0,128,0,-1--1--1,,1|(296,469)|
+1,186,183,42,1,0,0,0,0,128,0,-1--1--1,,1|(264,452)|
+10,187,Effective detection of disease,1102,-334,47,27,3,131,0,0,0,0,0,0
+12,188,48,822,-334,10,8,0,3,0,0,-1,0,0,0
+1,189,191,187,4,0,0,22,0,0,0,-1--1--1,,1|(1002,-334)|
+1,190,191,188,100,0,0,22,0,0,0,-1--1--1,,1|(884,-334)|
+11,191,48,943,-334,6,8,34,3,0,0,1,0,0,0
+10,192,Change in Detection rate,943,-308,52,18,40,3,0,0,-1,0,0,0
+10,193,Disease Detection rate,756,-287,53,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-128
+1,194,138,192,1,0,0,0,0,128,0,-1--1--1,,1|(1034,-253)|
+1,195,193,192,1,0,0,0,0,128,0,-1--1--1,,1|(845,-288)|
+1,196,193,187,1,0,0,0,0,128,1,-1--1--1,,1|(963,-410)|
+1,197,187,192,1,0,0,0,0,128,0,-1--1--1,,1|(1027,-294)|
+1,198,187,132,1,0,0,0,0,128,0,-1--1--1,,1|(1230,-253)|
+10,199,Immune Hygienic,669,656,37,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,200,Immune Population Non Hygienic,735,699,56,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,201,200,18,1,0,0,0,0,128,0,-1--1--1,,1|(963,654)|
+1,202,199,18,1,0,0,0,0,128,0,-1--1--1,,1|(850,623)|
+10,203,Total Dying Population,443,-332,59,18,8,3,0,0,0,0,0,0
+10,204,Quarantined Dying Population,316,-248,67,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,205,Non Quarantined Dying,551,-239,67,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,206,204,203,1,0,0,0,0,128,0,-1--1--1,,1|(337,-297)|
+1,207,205,203,1,0,0,0,0,128,0,-1--1--1,,1|(535,-293)|
+12,208,0,378,724,182,45,8,7,0,10,-1,0,0,0,-1--1--1,0-0-0,|30||0-255-0
+Hygiene Awareness Program
+10,209,Switch Awareness Program,321,652,74,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|B|0-255-0
+10,210,Awareness or No Awareness,443,536,64,18,8,3,0,0,0,0,0,0
+10,211,Hygiene program start time,498,663,73,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|B|0-255-0
+1,212,209,210,1,0,0,0,0,128,0,-1--1--1,,1|(398,587)|
+1,213,211,210,1,0,0,0,0,128,0,-1--1--1,,1|(467,601)|
+10,214,Time,422,618,29,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,215,214,210,0,0,0,0,0,64,0,-1--1--1,,1|(429,587)|
+1,216,210,106,1,0,0,0,0,128,0,-1--1--1,,1|(544,443)|
+10,217,Contact Factor Reduction,705,166,55,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-128
+1,218,217,81,1,0,0,0,0,128,0,-1--1--1,,1|(819,155)|
+10,219,Awareness Effect time,297,202,41,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-128
+1,220,219,105,1,0,0,0,0,128,0,-1--1--1,,1|(392,244)|
+1,221,1,106,1,0,0,0,0,128,0,-1--1--1,,1|(539,311)|
+10,222,Awareness Effectiveness,251,239,50,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-128
+1,223,222,105,1,0,0,0,0,128,0,-1--1--1,,1|(335,258)|
+12,224,0,1548,-245,133,45,8,7,0,10,-1,0,0,0,-1--1--1,0-0-0,|30||0-255-0
+Isolation Scale Up Program
+10,225,Switch Isolation Scale Up,1547,-136,64,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|B|0-255-0
+10,226,Isolation Scale up Start Time,1634,-33,59,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|B|0-255-0
+10,227,Scale up or No scale up,1451,-25,55,18,8,3,0,0,0,0,0,0
+1,228,225,227,1,0,0,0,0,128,0,-1--1--1,,1|(1513,-81)|
+1,229,226,227,1,0,0,0,0,128,0,-1--1--1,,1|(1540,-12)|
+10,230,Time,1646,-114,29,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,231,230,227,1,0,0,0,0,64,0,-1--1--1,,1|(1573,-65)|
+1,232,227,133,1,0,0,0,0,128,0,-1--1--1,,1|(1347,-64)|
+10,233,Vaccination Speed Non Hygienic,22,269,71,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-128
+1,234,233,42,1,0,0,0,0,128,0,-1--1--1,,1|(175,298)|
+1,235,20,42,1,0,0,0,0,128,0,-1--1--1,,1|(439,465)|
+1,236,89,48,1,0,0,0,0,128,0,-1--1--1,,1|(461,52)|
+1,237,219,48,1,0,0,0,0,128,0,-1--1--1,,1|(317,163)|
+1,238,219,42,1,0,0,0,0,128,0,-1--1--1,,1|(347,289)|
+10,239,Medical personnel available,287,-90,38,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,240,239,48,1,0,0,0,0,128,0,-1--1--1,,1|(311,15)|
+10,241,Medical personnel available,279,585,38,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,242,241,42,1,0,0,0,0,128,0,-1--1--1,,1|(327,497)|
+10,243,Vaccination Effectiveness,110,197,50,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-128
+1,244,243,48,1,0,0,0,0,128,0,-1--1--1,,1|(214,165)|
+1,245,243,42,1,0,0,0,0,128,0,-1--1--1,,1|(149,280)|
+1,246,1,42,0,0,0,0,0,64,0,-1--1--1,,1|(412,369)|
+1,247,43,48,0,0,0,0,0,64,0,-1--1--1,,1|(390,110)|
+1,248,43,81,1,0,0,0,0,128,0,-1--1--1,,1|(726,95)|
+1,249,1,9,1,0,0,0,0,128,0,-1--1--1,,1|(661,392)|
+1,250,145,58,1,0,0,0,0,128,0,-1--1--1,,1|(1743,272)|
+1,251,145,55,1,0,0,0,0,128,0,-1--1--1,,1|(1651,302)|
+10,252,Recovery Improved,2010,173,36,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-128
+1,253,252,59,1,0,0,0,0,128,0,-1--1--1,,1|(1959,118)|
+1,254,252,55,1,0,0,0,0,128,0,-1--1--1,,1|(1855,220)|
+1,255,233,47,1,0,0,0,0,128,0,-1--1--1,,1|(167,240)|
+10,256,Contact Factor,669,277,54,10,8,3,0,0,-1,0,0,0
+1,257,256,9,0,0,0,0,0,64,0,-1--1--1,,1|(717,323)|
+1,258,256,81,1,0,0,0,0,128,0,-1--1--1,,1|(697,218)|
+10,259,Media outreach Rollout,255,295,62,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|B|0-255-0
+1,260,259,105,1,0,0,0,0,128,0,-1--1--1,,1|(370,281)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Facilties
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,Vaccines Available,509,130,46,26,3,131,0,0,0,0,0,0
+12,2,48,752,126,10,8,0,3,0,0,-1,0,0,0
+1,3,5,2,4,0,0,22,0,0,0,-1--1--1,,1|(692,126)|
+1,4,5,1,100,0,0,22,0,0,0,-1--1--1,,1|(593,126)|
+11,5,48,636,126,6,8,34,3,0,0,1,0,0,0
+10,6,Vaccines Usage,636,145,51,11,40,3,0,0,-1,0,0,0
+12,7,48,257,129,10,8,0,3,0,0,-1,0,0,0
+1,8,10,1,4,0,0,22,0,0,0,-1--1--1,,1|(417,128)|
+1,9,10,7,100,0,0,22,0,0,0,-1--1--1,,1|(313,128)|
+11,10,48,364,128,6,8,34,3,0,0,1,0,0,0
+10,11,Preparing Vaccines,364,155,31,19,40,3,0,0,-1,0,0,0
+10,12,Vaccine Needed,142,-56,55,19,8,3,0,0,0,0,0,0
+10,13,Vaccine Preparation and availability time,551,215,70,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-64
+10,14,Vaccines Dosage,503,-53,57,11,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-64
+1,15,13,11,1,0,0,0,0,128,0,-1--1--1,,1|(438,195)|
+1,16,14,5,1,0,0,0,0,128,0,-1--1--1,,1|(617,60)|
+10,17,Culmulative Project Costs,1190,95,56,33,3,131,0,0,0,0,0,0
+12,18,48,911,92,10,8,0,3,0,0,-1,0,0,0
+1,19,21,17,4,0,0,22,0,0,0,-1--1--1,,1|(1083,92)|
+1,20,21,18,100,0,0,22,0,0,0,-1--1--1,,1|(971,92)|
+11,21,48,1027,92,6,8,34,3,0,0,1,0,0,0
+10,22,Spending,1027,119,30,11,40,3,0,0,-1,0,0,0
+10,23,Total Immunization through Vaccines,727,27,65,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,24,23,5,1,0,0,0,0,128,0,-1--1--1,,1|(652,82)|
+10,25,Personnel Available,468,453,54,37,3,131,0,0,0,0,0,0
+12,26,48,196,459,10,8,0,3,0,0,-1,0,0,0
+1,27,29,25,4,0,0,22,0,0,0,-1--1--1,,1|(364,459)|
+1,28,29,26,100,0,0,22,0,0,0,-1--1--1,,1|(254,459)|
+11,29,48,307,459,6,8,34,3,0,0,1,0,0,0
+10,30,training personnel,307,478,55,11,40,3,0,0,-1,0,0,0
+10,31,Total Cases of Exposure and Infection,340,944,59,21,8,130,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,32,Personnel per case to handle,58,212,64,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-64
+12,33,48,712,454,10,8,0,3,0,0,-1,0,0,0
+1,34,36,33,4,0,0,22,0,0,0,-1--1--1,,1|(660,454)|
+1,35,36,25,100,0,0,22,0,0,0,-1--1--1,,1|(564,454)|
+11,36,48,612,454,6,8,34,3,0,0,1,0,0,0
+10,37,Personnel Leaving,612,473,57,11,40,3,0,0,-1,0,0,0
+12,38,48,467,669,10,8,0,3,0,0,-1,0,0,0
+1,39,41,38,4,0,0,22,0,0,0,-1--1--1,,1|(467,621)|
+1,40,41,25,100,0,0,22,0,0,0,-1--1--1,,1|(467,529)|
+11,41,48,467,575,8,6,33,3,0,0,4,0,0,0
+10,42,Personnel dying,535,575,50,11,40,3,0,0,-1,0,0,0
+10,43,Total Isolation capacity,1309,497,49,26,3,131,0,0,0,0,0,0
+12,44,48,1075,498,10,8,0,3,0,0,-1,0,0,0
+1,45,47,43,4,0,0,22,0,0,0,-1--1--1,,1|(1204,498)|
+1,46,47,44,100,0,0,22,0,0,0,-1--1--1,,1|(1110,498)|
+11,47,48,1142,498,6,8,34,3,0,0,1,0,0,0
+10,48,preparing isolation capacity,1142,525,58,19,40,3,0,0,-1,0,0,0
+12,49,48,1314,253,10,8,0,3,0,0,-1,0,0,0
+1,50,52,49,4,0,0,22,0,0,0,-1--1--1,,1|(1314,310)|
+1,51,52,43,100,0,0,22,0,0,0,-1--1--1,,1|(1314,421)|
+11,52,48,1314,366,8,6,33,3,0,0,4,0,0,0
+10,53,Downscaling Isolation capacity,1369,366,47,19,40,3,0,0,-1,0,0,0
+10,54,Initial personnel available,408,513,50,19,8,3,0,0,0,0,0,0
+1,55,54,25,0,0,0,0,0,128,1,-1--1--1,,1|(425,496)|
+10,56,New Personnel Training Time,213,556,52,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-64
+10,57,fractional growth rate of cases,484,861,54,19,8,3,0,0,0,0,0,0
+10,58,Increasing Cases,575,948,46,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,59,31,57,0,0,0,0,0,128,0,-1--1--1,,1|(408,904)|
+1,60,58,57,0,0,0,0,0,128,0,-1--1--1,,1|(536,909)|
+10,61,Natural Log 2,679,890,45,11,8,3,0,0,0,0,0,0
+10,62,Case Doubling Time,565,777,47,19,8,3,0,0,0,0,0,0
+1,63,57,62,0,0,0,0,0,128,0,-1--1--1,,1|(520,824)|
+1,64,61,62,0,0,0,0,0,128,0,-1--1--1,,1|(632,842)|
+10,65,Isolation capacity preparation time,1309,620,60,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-64
+10,66,Case doubling compared to isloation available,1007,780,80,19,8,3,0,0,0,0,0,0
+1,67,62,66,1,0,0,0,0,128,0,-1--1--1,,1|(792,812)|
+1,68,65,66,1,0,0,0,0,128,0,-1--1--1,,1|(1152,724)|
+10,69,Case doubling time compared to personnel training time,246,652,73,28,8,3,0,0,0,0,0,0
+1,70,62,69,1,0,0,0,0,128,0,-1--1--1,,1|(359,721)|
+1,71,56,69,1,0,0,0,0,128,0,-1--1--1,,1|(216,606)|
+10,72,Fraction of Tracing personnel,554,361,61,19,8,3,0,2,0,0,0,0,-1--1--1,0-0-0,|12||128-0-64
+10,73,Tracing personnel available,376,370,57,19,8,3,0,0,0,0,0,0
+1,74,25,73,1,0,0,0,0,128,0,-1--1--1,,1|(424,401)|
+10,75,Medical personnel available,774,328,59,19,8,3,0,0,0,0,0,0
+1,76,25,75,1,0,0,0,0,128,0,-1--1--1,,1|(672,392)|
+1,77,72,73,1,0,0,0,0,128,0,-1--1--1,,1|(474,378)|
+1,78,72,75,0,0,0,0,0,128,0,-1--1--1,,1|(659,345)|
+10,79,relative availability of tracing personnel,427,271,66,19,8,3,0,0,0,0,0,0
+1,80,73,79,1,0,0,0,0,128,0,-1--1--1,,1|(400,337)|
+10,81,Reporting new cases,-83,213,52,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,82,14,12,1,0,0,0,0,128,0,-1--1--1,,1|(301,-88)|
+10,83,Total Personnel Demand Reactive,65,339,57,19,8,3,0,0,0,0,0,0
+1,84,32,83,1,0,0,0,0,128,0,-1--1--1,,1|(38,283)|
+1,85,81,83,1,0,0,0,0,128,0,-1--1--1,,1|(-26,274)|
+1,86,83,79,1,0,0,0,0,128,0,-1--1--1,,1|(238,341)|
+1,87,56,30,1,0,0,0,0,128,0,-1--1--1,,1|(228,508)|
+10,88,Total Personnal Demand actual,118,411,50,19,8,3,0,0,0,0,0,0
+10,89,Total personnel Demand proactive,-30,477,59,19,8,3,0,0,0,0,0,0
+10,90,Fraction of additional personnel as proactiveness,-200,380,74,28,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|B|0-255-0
+10,91,Vaccination Program Start time,-215,84,67,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|B|0-255-0
+10,92,Fraction of Additional capacity as proactiveness,844,673,76,28,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|B|0-255-0
+1,93,69,89,1,0,0,0,0,128,0,-1--1--1,,1|(47,581)|
+1,94,90,89,1,0,0,0,0,128,0,-1--1--1,,1|(-148,442)|
+1,95,83,89,1,0,0,0,0,128,0,-1--1--1,,1|(-2,402)|
+1,96,89,88,1,0,0,0,0,128,0,-1--1--1,,1|(41,430)|
+1,97,83,88,0,0,0,0,0,128,0,-1--1--1,,1|(88,369)|
+10,98,Vaccine Shortage,271,25,56,11,8,3,0,0,0,0,0,0
+10,99,Average Staff commisioning time,698,581,65,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|B|0-255-0
+1,100,25,37,1,0,0,0,0,128,0,-1--1--1,,1|(526,522)|
+1,101,99,37,1,0,0,0,0,128,0,-1--1--1,,1|(633,526)|
+10,102,Recovered population,-289,610,40,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,103,Total Susceptible population,-268,708,60,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,104,Case fatality rate reduction,654,645,44,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,105,25,42,1,0,0,0,0,128,0,-1--1--1,,1|(507,546)|
+10,106,fraction of staff getting infected,552,693,54,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-64
+1,107,106,42,1,0,0,0,0,128,0,-1--1--1,,1|(517,616)|
+1,108,104,42,1,0,0,0,0,128,0,-1--1--1,,1|(582,621)|
+10,109,fraction of recovered population volunteering for personnel,-240,545,93,28,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-64
+10,110,fraction of susceptible population volunteering for personnel,-95,730,93,28,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-64
+10,111,fraction of population available for personnel,-38,617,71,19,8,3,0,0,0,0,0,0
+1,112,109,111,1,0,0,0,0,128,0,-1--1--1,,1|(-144,559)|
+1,113,102,111,1,0,0,0,0,128,0,-1--1--1,,1|(-192,584)|
+1,114,110,111,1,0,0,0,0,128,0,-1--1--1,,1|(-57,682)|
+1,115,103,111,1,0,0,0,0,128,0,-1--1--1,,1|(-147,684)|
+10,116,shortage of personnel,265,395,36,19,8,3,0,0,0,0,0,0
+1,117,88,116,1,0,0,0,0,128,0,-1--1--1,,1|(174,390)|
+1,118,25,116,1,0,0,0,0,128,0,-1--1--1,,1|(347,407)|
+1,119,111,30,1,0,0,0,0,128,0,-1--1--1,,1|(92,529)|
+1,120,116,29,0,0,0,0,0,128,0,-1--1--1,,1|(287,427)|
+10,121,Total Susceptible population,6,22,60,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,122,121,12,1,0,0,0,0,128,0,-1--1--1,,1|(43,-36)|
+1,123,1,98,1,0,0,0,0,128,0,-1--1--1,,1|(372,82)|
+1,124,12,98,1,0,0,0,0,128,0,-1--1--1,,1|(173,-21)|
+1,125,98,10,1,0,0,0,0,128,0,-1--1--1,,1|(280,52)|
+10,126,Time,265,180,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,127,Switch Proactive or Reactive,335,234,63,19,8,3,0,0,0,0,0,0
+10,128,Proactive starting time,269,291,45,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|B|0-255-0
+10,129,Proactive or Reactive,163,263,40,19,8,3,0,0,0,0,0,0
+1,130,126,129,1,0,0,0,0,128,0,-1--1--1,,1|(176,214)|
+1,131,127,129,1,0,0,0,0,128,0,-1--1--1,,1|(233,233)|
+1,132,128,129,1,0,0,0,0,128,0,-1--1--1,,1|(196,294)|
+1,133,129,88,1,0,0,0,0,128,0,-1--1--1,,1|(145,327)|
+10,134,Switch Vaccine or No Vaccine,-179,-9,62,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|B|0-255-0
+10,135,Vaccine or No Vaccine,135,35,48,19,8,3,0,0,0,0,0,0
+1,136,134,135,1,0,0,0,0,128,0,-1--1--1,,1|(-25,67)|
+1,137,91,135,1,0,0,0,0,128,0,-1--1--1,,1|(-17,130)|
+1,138,126,135,1,0,0,0,0,128,0,-1--1--1,,1|(213,134)|
+1,139,135,98,1,0,0,0,0,128,0,-1--1--1,,1|(204,55)|
+1,140,65,48,1,0,0,0,0,128,0,-1--1--1,,1|(1203,565)|
+10,141,Reporting new cases,896,261,52,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,142,Isolation capacity needed reactive,944,433,56,19,8,3,0,0,0,0,0,0
+10,143,New capacity needed Proactive,988,552,56,19,8,3,0,0,0,0,0,0
+10,144,New capacity needed Actual,1157,380,46,19,8,3,0,0,0,0,0,0
+1,145,142,143,1,0,0,0,0,128,0,-1--1--1,,1|(953,482)|
+1,146,92,143,0,0,0,0,0,128,0,-1--1--1,,1|(916,612)|
+1,147,66,143,1,0,0,0,0,128,0,-1--1--1,,1|(974,664)|
+1,148,143,144,1,0,0,0,0,128,0,-1--1--1,,1|(1065,429)|
+1,149,142,144,1,0,0,0,0,128,0,-1--1--1,,1|(1005,389)|
+10,150,Average critical condition and recovery period,806,519,73,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,151,150,142,1,0,0,0,0,128,0,-1--1--1,,1|(881,496)|
+1,152,141,142,1,0,0,0,0,128,0,-1--1--1,,1|(892,353)|
+10,153,Quarantined Infectious Population,1441,213,58,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,154,153,142,1,0,0,0,0,128,0,-1--1--1,,1|(1135,243)|
+1,155,43,142,1,0,0,0,0,128,0,-1--1--1,,1|(1150,445)|
+10,156,Proactive or Reactive,1196,295,44,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,157,156,144,1,0,0,0,0,128,0,-1--1--1,,1|(1163,335)|
+10,158,Facility commisioning time,1452,440,65,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|B|0-255-0
+1,159,144,47,1,0,0,0,0,128,0,-1--1--1,,1|(1165,431)|
+1,160,43,53,1,0,0,0,0,128,0,-1--1--1,,1|(1265,431)|
+1,161,158,53,1,0,0,0,0,128,0,-1--1--1,,1|(1445,398)|
+10,162,Available Isolation Capacity,1557,557,59,19,8,3,0,0,0,0,0,0
+1,163,43,162,1,0,0,0,0,128,0,-1--1--1,,1|(1424,571)|
+1,164,153,162,1,0,0,0,0,128,0,-1--1--1,,1|(1580,358)|
+10,165,Staff costs,882,49,34,11,8,3,0,2,0,0,0,0,-1--1--1,0-0-0,|12||128-0-64
+1,166,165,21,1,0,0,0,0,128,0,-1--1--1,,1|(946,76)|
+10,167,Total Dying Population,1275,10,42,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,168,167,21,1,0,0,0,0,128,0,-1--1--1,,1|(1124,38)|
+10,169,training personnel,915,-16,36,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,170,169,21,1,0,0,0,0,128,0,-1--1--1,,1|(961,42)|
+10,171,Vaccines cost per case,965,-66,57,19,8,3,0,2,0,0,0,0,-1--1--1,0-0-0,|12||128-0-64
+1,172,171,21,1,0,0,0,0,128,0,-1--1--1,,1|(984,8)|
+10,173,Cost for handling deceased,1041,-114,55,19,8,3,0,2,0,0,0,0,-1--1--1,0-0-0,|12||128-0-64
+1,174,173,21,1,0,0,0,0,128,0,-1--1--1,,1|(1023,-15)|
+10,175,Cost for Isolation facilties,1137,-77,56,19,8,3,0,2,0,0,0,0,-1--1--1,0-0-0,|12||128-0-64
+1,176,175,21,1,0,0,0,0,128,0,-1--1--1,,1|(1076,-25)|
+1,177,47,22,1,0,0,0,0,128,0,-1--1--1,,1|(1005,293)|
+1,178,23,22,1,0,0,0,0,128,0,-1--1--1,,1|(855,105)|
+12,179,0,-134,-109,128,46,8,7,0,11,-1,0,0,0,0-0-255,0-0-0,|30||0-255-0
+Vaccination Program Policy
+10,180,Relative availability of Medical Personnel,636,277,69,19,8,3,0,0,0,0,0,0
+1,181,83,180,1,0,0,0,0,128,0,-1--1--1,,1|(378,341)|
+1,182,75,180,0,0,0,0,0,128,0,-1--1--1,,1|(713,304)|
+10,183,Cost For Advertising,1241,-57,40,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-128
+1,184,183,21,1,0,0,0,0,128,0,-1--1--1,,1|(1164,-24)|
+10,185,Awareness raising Hygiene,1165,168,62,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,186,185,22,1,0,0,0,0,128,0,-1--1--1,,1|(1119,157)|
+10,187,Development cost for vaccines,770,-79,61,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|I|128-0-128
+1,188,187,21,1,0,0,0,0,128,0,-1--1--1,,1|(843,-12)|
+1,189,1,5,1,0,0,0,0,128,0,-1--1--1,,1|(572,81)|
+10,190,Vaccination rollout Rate,72,140,43,19,8,3,0,18,0,0,0,0,-1--1--1,0-0-0,|12|B|0-255-0
+1,191,190,11,1,0,0,0,0,128,0,-1--1--1,,1|(172,156)|
+///---\\\
+:L<%^E!@
+9:SIERNoPolic112
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,5,0,0
+19:80,0
+27:2,
+34:0,
+4:Time
+5:Media outreach Rollout
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:4
+41:0
+42:0
+24:0
+25:365
+26:365
